@@ -7,6 +7,7 @@ from collections import deque
 
 depth = 0
 i = 0
+j = -10
 
 #this function will check to see if a link is valid
 def validate(n):
@@ -35,18 +36,16 @@ string = raw_input("Please enter search string: ");
 max_depth = int(raw_input("Please enter the max depth to crawl to: "));
 	
 #create visited and unvisited lists as well as a temp list to hold unvisited links during iteration
-unvisited = deque([])
-visited = deque([])
+unvisited = []
+visited = []
 temp = []
 
 #append the url seed to the unvisited list
 unvisited.append(url_seed)
 
-currenturl = unvisited.popleft()
+currenturl = unvisited.pop(0)
 
-while(unvisited != []):
-	if depth > max_depth: break
-	
+while(depth < max_depth):	
 	try:
 		#open the url for parsing
 		url = urllib2.urlopen(currenturl) 
@@ -56,7 +55,6 @@ while(unvisited != []):
 		
 		#this will see if string is on current html page
 		#regexp is looking for an occurrence of string not the exact match to the NavigableString string
-		#find_string = soup.body.find(text=re.compile(string))
 		find_string = soup.body.findAll(text=re.compile(string), limit=1) 
 		
 		#if the keyword is found, print that the string is not on the currenturl
@@ -67,10 +65,11 @@ while(unvisited != []):
 			print string, "was found on the page: ", currenturl
 		
 		#Find all links in anchor tags and extract only the links
-		links =  soup.findAll('a', href = re.compile("http://")) 
-						
+		if soup != None:
+			links =  soup.findAll('a', href = re.compile("http://")) 
+			
 		#this should only happen once, since unvisited list won't be populated with links in the first iteration
-		if(unvisited == deque([]) and visited == deque([])):
+		if(unvisited == [] and visited == []):
 			for link in links:
 				if validate(link['href']) == 1 and visited_test(link['href']) == 1 and unvisited_test(link['href']) == 1 and len(temp) < 10:
 					temp.append(link['href'])
@@ -82,25 +81,25 @@ while(unvisited != []):
 					temp.append(link['href'])
 					
 									
-		#extend unvisited list with all of the links accumulated in current iteration
+		#Add recently fetched links to the beginning of unvisited
 		unvisited.extend(temp)
-			
+		
 		#free memory in temp list
 		del temp[:]
 			
 		#each time temp list is filled with 10 new links, a new depth has been reached
 		depth = depth + 1
-		print "current depth is ", depth
-			
+
 		#move current url to visited list
 		visited.append(currenturl)
 		
-		currenturl = unvisited.popleft()
-		print currenturl
+		#Pop the next j += 10 link from the unvisited list
+		j = j + 10
+		currenturl = unvisited.pop(j)
 
 	except ValueError, urllib2.URLError:
-		if unvisited != deque([]):
-			currenturl = unvisited.popleft()
+		if unvisited != []:
+			currenturl = unvisited.pop()
 		else:
 			print "Oops!", currenturl, "is not a valid url and there are no more links to parse"
 			break
