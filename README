@@ -2,4 +2,4 @@ A simple web crawler written in Python as part of a coding challenge.
 
 The user enters in an initial url, a string to be searched on each page, and an integer which is the max depth to crawl to.
 
-Only visited web pages (those that are parsed) are searched for the user keyword
+Only visited web pages (those that are parsed) are searched for the user keyword.
