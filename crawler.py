@@ -21,7 +21,7 @@ def visited_test(n):
 	return 1
     return 0
 	
-#this link will see if a link is already in the unvisited list
+#this function will see if a link is already in the unvisited list
 def unvisited_test(n):
     if unvisited.count(n) == 0:
         return 1
@@ -67,10 +67,10 @@ while(depth < max_depth):
 	#regexp is looking for an occurrence of string not the exact match to the NavigableString string
 	find_string = soup.body.findAll(text=re.compile(string), limit=1) 
 		
-	#if the keyword is found, print that the string is not on the currenturl
+	#if the keyword is found, print that the string was found on the currenturl
 	if find_string == []: 
             print string, "was not found on the page: ", currenturl 
-	#otherwise, print that the keyword was not foudn on the currenturl
+	#otherwise, print that the keyword was not found on the currenturl
 	else: 
             print string, "was found on the page: ", currenturl
 		
@@ -93,14 +93,16 @@ while(depth < max_depth):
                         temp.append(link['href'])
 					
 									
-	#Add recently fetched links to the beginning of unvisited
+	#Add recently fetched links to the end of unvisited
 	unvisited.extend(temp)
 		
+	#if no links were received during current iteration, fetch link from previous iteration
 	if len(temp) == 0:
             firstlink = unvisited.pop()
 	    print "no valid links were found on", currenturl, "retrieving new link..."
 	    currenturl = firstlink
 
+	#otherwise, fetch first link retrieved during current iteration
 	else:
             firstlink = temp.pop(0)
 		
@@ -112,11 +114,14 @@ while(depth < max_depth):
 	    print "current depth is", depth
 	    print "\n"
 
+	    #set current url to link fetched
 	    currenturl = firstlink
 		
+    #if error occurs while trying to open link, throw exception and pop a new link if there is one
     except (ValueError, urllib2.URLError, BadStatusLine, urllib2.HTTPError):
         if unvisited != []:
 			currenturl = unvisited.pop()
+	#otherwise, alert the user that their link is invalid and there are no more links
 	else:
 	    print "Oops!", currenturl, "is not a valid url and there are no more links to parse"
 	    break
